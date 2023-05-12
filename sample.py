@@ -1,22 +1,7 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    codigo_tono.py                                     :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: tvillare <tvillare@student.42madrid.com    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2023/04/20 18:01:34 by tvillare          #+#    #+#              #
-#    Updated: 2023/05/03 12:23:09 by rzamolo-         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
-import sys
 import re
 import hashlib
 import argparse
-import os
 import hmac
-import base64
 import struct
 import time
 from Crypto.Cipher import AES
@@ -45,15 +30,9 @@ re_hexa = re.compile("^[0-9a-fA-F]+$")
 
 
 def cifrar(mensaje, clave_maestra):
-	# Generar un vector de inicialización aleatorio
 	iv = get_random_bytes(16)
-
-	# Crear un cifrador AES con la clave maestra y el vector de inicialización
 	cifrador = AES.new(clave_maestra, AES.MODE_CFB, iv)
-
-	# Cifrar el mensaje y agregar el vector de inicialización al inicio del mensaje cifrado
 	mensaje_cifrado = iv + cifrador.encrypt(mensaje.encode())
-
 	return mensaje_cifrado
 
 def descifrar(mensaje_cifrado, clave_maestra):
@@ -88,19 +67,6 @@ def get_totp_token(secret):
 	#adding 0 in the beginning till OTP has 6 digits
 	return x.zfill(6)
 
-######crear .key
-
-def leer_fichero(file, mode):
-	try:
-		archivo = open(file, mode)
-		# Lee el contenido del archivo usando read()
-		contenido = archivo.read()
-		archivo.close()
-	except:
-		print("Error file")
-		sys.exit()
-	return contenido
-
 def create_file_key(file, contenido):
 	## ESCIRBIR EN EL FICHERO
 	name = file.split(".")[0] + ".key"
@@ -120,8 +86,10 @@ def create_key(file):
 def get_passwd():
 	secret = input("Introduce la contraeña: ")
 	secret_hash = hashlib.sha256(secret.encode('utf-8')).digest()
+	####
 	passwd = secret_hash
 	return passwd
+	####
 
 clave_maestra = get_passwd()
 if (args.g != None):
