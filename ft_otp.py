@@ -6,9 +6,13 @@
 #    By: rzamolo- <rzamolo-@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/04/24 11:22:09 by rzamolo-          #+#    #+#              #
-#    Updated: 2023/05/20 16:17:04 by rzamolo-         ###   ########.fr        #
+#    Updated: 2023/05/30 14:42:36 by rzamolo-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
+
+# Add a check if a flag -g or -k is provided
+# Add a check if the file is a .key or a hexadecimal file
+
 
 import sys
 import re
@@ -20,6 +24,7 @@ import time
 # pip install qrcode-terminal
 import qrcode_terminal
 # pip install pycryptodome
+# conda install pycrypto
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
@@ -41,22 +46,22 @@ re_hexa = re.compile("^[0-9a-fA-F]+$")
 
 def encrypt(message, master_key):
     # Generate a random initialization vector
-    iv = get_random_bytes(16)
+    salt = get_random_bytes(16)
 
     # Create an AES cipher with the master key and initialization vector
-    cipher = AES.new(master_key, AES.MODE_CFB, iv)
+    cipher = AES.new(master_key, AES.MODE_CFB, salt)
 
     # Encrypt the message and prepend the initialization vector to the encrypted message
-    encrypted_message = iv + cipher.encrypt(message.encode())
+    encrypted_message = salt + cipher.encrypt(message.encode())
 
     return encrypted_message
 
 def decrypt(encrypted_message, master_key):
     # Get the initialization vector from the encrypted message
-    iv = encrypted_message[:16]
+    salt = encrypted_message[:16]
 
     # Create an AES cipher with the master key and initialization vector
-    cipher = AES.new(master_key, AES.MODE_CFB, iv)
+    cipher = AES.new(master_key, AES.MODE_CFB, salt)
 
     # Decrypt the message
     decrypted_message = cipher.decrypt(encrypted_message[16:]).decode()
@@ -94,7 +99,7 @@ def create_key_file(file, content):
     name = file.split(".")[0] + ".key"
     with open(name, "wb") as f:
         f.write(content)
-    print(f"Key was successfully saved in {name}.")
+    print("Key was successfully saved in {}.".format(name))
 
 def create_key(file):
     hexa = read_file(file, "r")
