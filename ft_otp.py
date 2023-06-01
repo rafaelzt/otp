@@ -6,7 +6,7 @@
 #    By: rzamolo- <rzamolo-@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/04/24 11:22:09 by rzamolo-          #+#    #+#              #
-#    Updated: 2023/06/01 11:17:17 by rzamolo-         ###   ########.fr        #
+#    Updated: 2023/06/01 15:58:51 by rzamolo-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,12 +21,7 @@ class colors:
 	END = '\033[00m'
 
 
-
-
-
 # Add a check if the file is a .key or a hexadecimal file
-
-
 import sys
 import re
 import hashlib
@@ -34,7 +29,7 @@ import argparse
 import hmac
 import struct
 import time
-# pip install qrcode-terminal
+# pip install qrcode_terminal
 import qrcode_terminal
 
 # pip install pycryptodome
@@ -42,7 +37,7 @@ import qrcode_terminal
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
-re_hexa = re.compile("^[0-9a-fA-F]+$")
+re_hex = re.compile("^[0-9a-fA-F]+$")
 
 def parse_args():
 	parser = argparse.ArgumentParser(description='')
@@ -113,7 +108,7 @@ def read_file(file, mode):
         with open(file, mode) as f:
             content = f.read()
     except:
-        print("\033[91mError: File not found\033[00m")
+        print(colors.RED + colors.BOLD + "Error: File not found!" + colors.END)
         sys.exit()
     return content
 
@@ -125,11 +120,11 @@ def create_key_file(file, content):
     print("Key was successfully saved in {}.".format(name))
 
 def create_key(file):
-    hexa = read_file(file, "r")
-    if not (re_hexa.match(hexa)) or len(hexa) < 64:
-        print("./ft_otp: error: key must be 64 hexadecimal characters.")
+    hex = read_file(file, "r")
+    if not (re_hex.match(hex)) or len(hex) < 64:
+        print(colors.RED + colors.BOLD + "./ft_otp: error: key must be 64 hexadecimal characters." + colors.END)
         return
-    encrypted_hex = encrypt(hexa, master_key)
+    encrypted_hex = encrypt(hex, master_key)
     create_key_file(file, encrypted_hex)
 
 def get_password():
@@ -138,20 +133,20 @@ def get_password():
     password = secret_hash
     return password
 
-# master_key = get_password()
-# if (args.g is not None):
-#     create_key(args.g)
-# elif (args.k is not None):
-#     secret = read_file(args.k, "rb")
-#     try:
-#         plain_text = decrypt(secret, master_key)
-#     except:
-#         print("Decryption error")
-#     else:
-#         key = get_totp_token(plain_text)
-#         print(key)
-#         qrcode_terminal.draw(str(key))
+
 
 if __name__ == "__main__":
 	arguments = parse_args()
+	master_key = get_password()
+	if (arguments.g is not None):
+		create_key(arguments.g)
+	elif (arguments.k is not None):
+		secret = read_file(arguments.k, "rb")
+		try:
+			plain_text = decrypt(secret, master_key)
+			key = get_totp_token(plain_text)
+			print(key)
+			qrcode_terminal.draw(str(key))
+		except:
+			print("Decryption error")
 	# print(colors.BOLD + colors.RED + str(arguments) + colors.END)

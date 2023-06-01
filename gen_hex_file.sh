@@ -7,4 +7,4 @@ openssl rand -hex $SIZE > $FILE_NAME
 tr -d '\n' < $FILE_NAME > $FILE_NAME.tmp
 rm $FILE_NAME && mv $FILE_NAME.tmp $FILE_NAME
 
-echo "Generated $FILE_NAME with $SIZE bytes"
+echo "Generated $FILE_NAME"
