@@ -6,11 +6,24 @@
 #    By: rzamolo- <rzamolo-@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/04/24 11:22:09 by rzamolo-          #+#    #+#              #
-#    Updated: 2023/05/30 14:42:36 by rzamolo-         ###   ########.fr        #
+#    Updated: 2023/06/01 11:17:17 by rzamolo-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-# Add a check if a flag -g or -k is provided
+class colors:
+	RED = '\033[91m'
+	GREEN =	'\033[92m'
+	YELLOW = '\033[93m'
+	PURPLE = '\033[95m'
+	BLACK = '\033[98m'
+	BOLD = '\033[1m'
+	UNDERLINE = '\033[4m'
+	END = '\033[00m'
+
+
+
+
+
 # Add a check if the file is a .key or a hexadecimal file
 
 
@@ -23,26 +36,36 @@ import struct
 import time
 # pip install qrcode-terminal
 import qrcode_terminal
+
 # pip install pycryptodome
 # conda install pycrypto
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
-parser = argparse.ArgumentParser(description='')
-
-parser.add_argument('-g',
-                    type=str,
-                    dest='g',
-                    help="Provide hexadecimal file and generate .key")
-
-parser.add_argument('-k',
-                    type=str,
-                    dest='k',
-                    help="provide a .key file and generate a time-based key")
-
-args = parser.parse_args()
-
 re_hexa = re.compile("^[0-9a-fA-F]+$")
+
+def parse_args():
+	parser = argparse.ArgumentParser(description='')
+
+	parser.add_argument('-g',
+						type=str,
+						dest='g',
+						help="Provide hexadecimal file and generate .key")
+
+	parser.add_argument('-k',
+						type=str,
+						dest='k',
+						help="provide a .key file and generate a time-based key")
+
+	args = parser.parse_args()
+	if (args.g is None and args.k is None):
+		print(colors.BOLD + colors.RED + " Provide a flag -g or -k " + colors.END)
+		sys.exit()
+	elif (args.g is not None) and (args.k is not None):
+		print(colors.BOLD + colors.RED + " Too many arguments " + colors.END)
+		sys.exit()
+	else:
+		return args
 
 def encrypt(message, master_key):
     # Generate a random initialization vector
@@ -90,7 +113,7 @@ def read_file(file, mode):
         with open(file, mode) as f:
             content = f.read()
     except:
-        print("Error: File not found")
+        print("\033[91mError: File not found\033[00m")
         sys.exit()
     return content
 
@@ -115,20 +138,20 @@ def get_password():
     password = secret_hash
     return password
 
-if (args.g is not None) and (args.k is not None):
-    print("Too many arguments")
-    sys.exit()
+# master_key = get_password()
+# if (args.g is not None):
+#     create_key(args.g)
+# elif (args.k is not None):
+#     secret = read_file(args.k, "rb")
+#     try:
+#         plain_text = decrypt(secret, master_key)
+#     except:
+#         print("Decryption error")
+#     else:
+#         key = get_totp_token(plain_text)
+#         print(key)
+#         qrcode_terminal.draw(str(key))
 
-master_key = get_password()
-if (args.g is not None):
-    create_key(args.g)
-elif (args.k is not None):
-    secret = read_file(args.k, "rb")
-    try:
-        plain_text = decrypt(secret, master_key)
-    except:
-        print("Decryption error")
-    else:
-        key = get_totp_token(plain_text)
-        print(key)
-        qrcode_terminal.draw(str(key))
+if __name__ == "__main__":
+	arguments = parse_args()
+	# print(colors.BOLD + colors.RED + str(arguments) + colors.END)
